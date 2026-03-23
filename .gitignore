@@ -1,0 +1,61 @@
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Python
+__pycache__/
+*-checkpoint.ipynb
+.venv
+*.egg*
+build/*
+_C.*
+*.pyc
+.pytest_cache/
+
+# Outputs
+outputs/*
+events.*
+sam2_logs/*
+
+# Model weights (managed by Hugging Face)
+checkpoints/*.pt
+checkpoints/*.pth
+checkpoints/*.onnx
+checkpoints/*.engine
+checkpoints/*.safetensors
+demo/backend/checkpoints/*.pt
+demo/backend/checkpoints/*.pth
+
+# Large data files (managed by Hugging Face)
+*.pt
+*.pth
+*.onnx
+*.engine
+*.safetensors
+*.ckpt
+*.bin
+
+# Datasets (managed by Hugging Face)
+datasets/*
+!datasets/.gitkeep
+sav_dataset/*
+!sav_dataset/.gitkeep
+
+# Large media files (managed by Hugging Face)
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.mp4
+*.avi
+*.mov
+*.mat
+*.h5
+*.hdf5
+*.npz
+*.npy
+
+# Keep structure
+!.gitkeep
+

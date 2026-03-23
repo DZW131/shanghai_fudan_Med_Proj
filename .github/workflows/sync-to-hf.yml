@@ -1,0 +1,56 @@
+name: Sync Resources to Hugging Face
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'checkpoints/**'
+      - 'datasets/**'
+  workflow_dispatch:
+
+jobs:
+  sync-checkpoints:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install huggingface-hub
+
+      - name: Upload checkpoints to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python hf_manager.py \
+            --repo-id ${{ secrets.HF_REPO_ID }} \
+            --token $HF_TOKEN \
+            --action upload-ckpt
+
+  sync-datasets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install huggingface-hub
+
+      - name: Upload datasets to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python hf_manager.py \
+            --repo-id ${{ secrets.HF_REPO_ID }} \
+            --token $HF_TOKEN \
+            --action upload-data
