@@ -56,7 +56,7 @@ config = {
         "multitask_num": 2,
     },
     "trop2_me_nu": {
-        "ckpt_path": "checkpoints/sam2_trop2_me_nu_finetuned.pth",
+        "ckpt_path": "checkpoints/trop2_me_nu_train/checkpoints/checkpoint.pt",
         "config_file": "configs/sam2.1/sam2.1_hiera_b+.yaml",
         "label": ["肿瘤细胞膜", "肿瘤细胞核"],
         "order": [0, 1],

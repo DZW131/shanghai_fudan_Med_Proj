@@ -171,8 +171,12 @@ def main(local_rank, world_size, args):
         logging.info(loss_meters)
         # evaluate(model, val_loader, device)
     checkpoint = {"model": model.module.state_dict()}
-    torch.save(checkpoint, "checkpoints/sam2_trop2_me_nu_finetuned.pth")
-    logging.info("训练完成")
+    # 根据配置动态生成保存路径
+    exp_dir = cfg.launcher.experiment_log_dir
+    ckpt_path = f"{exp_dir}/checkpoints/checkpoint.pt"
+    os.makedirs(os.path.dirname(ckpt_path), exist_ok=True)
+    torch.save(checkpoint, ckpt_path)
+    logging.info(f"训练完成，权重保存至: {ckpt_path}")
 
 
 def parse_args():
