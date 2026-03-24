@@ -2,7 +2,8 @@ import os
 
 import torch
 import torch.distributed as dist
-from hydra import compose
+from hydra import compose, initialize
+from hydra.core.global_hydra import GlobalHydra
 from hydra.utils import instantiate
 from sam2.build_sam import build_sam2
 from torch import nn
@@ -97,7 +98,12 @@ def main(local_rank, world_size, args):
     rank = init_distributed_mode(local_rank, world_size)
     setup_logging(__name__, rank=rank, output_dir=".")
     # 加载配置文件
-    cfg = compose(config_name=args.config)
+    # Extract config path and name for Hydra initialization
+    config_path = os.path.dirname(args.config)
+    config_name = os.path.splitext(os.path.basename(args.config))[0]
+    GlobalHydra.instance().clear()  # Clear any existing Hydra state
+    with initialize(version_base="1.3", config_path=config_path):
+        cfg = compose(config_name=config_name)
     optim_conf = OptimConf(**cfg.trainer.optim)
     device = setup_device("cuda")
 
@@ -110,10 +116,12 @@ def main(local_rank, world_size, args):
     for d in range(dataset_num):
         logging.info(f"数据集 {d} 数量: {data['train'].datasets[d].__len__()}")
 
-    # 构建模型
-    model = build_sam2(
-        "configs/sam2.1/sam2.1_hiera_b+.yaml", ckpt_path="bplus_finetune.pth"
-    )
+    # 构建模型 - 使用SAM 2.1 Base+预训练权重
+    # 直接使用已解析的 cfg.trainer.model 实例化模型，避免重复加载配置
+    from sam2.build_sam import _load_checkpoint
+    model = instantiate(cfg.trainer.model, _recursive_=True)
+    _load_checkpoint(model, "checkpoints/sam2.1_hiera_base_plus.pt")
+    model = model.to(device)  # 将模型移到 GPU
     #    multitask_num=len(cfg.trainer.data.train.datasets[0].dataset.datasets[0].video_dataset.gt_folder))
 
     scaler = torch.amp.GradScaler(
@@ -163,7 +171,7 @@ def main(local_rank, world_size, args):
         logging.info(loss_meters)
         # evaluate(model, val_loader, device)
     checkpoint = {"model": model.module.state_dict()}
-    torch.save(checkpoint, "bplus_finetune_mul_query.pth")
+    torch.save(checkpoint, "checkpoints/sam2_trop2_me_nu_finetuned.pth")
     logging.info("训练完成")
 
 
@@ -173,7 +181,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--config",
-        default="configs/sam2.1_training/sam2.1_hiera_b+_trop2_mul_query.yaml",
+        default="sam2/configs/sam2.1_training/sam2.1_hiera_b+_trop2_me_nu.yaml",
         help="config file",
     )
     parser.add_argument("--local_rank", type=int, default=0)

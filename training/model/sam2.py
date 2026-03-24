@@ -221,27 +221,25 @@ class SAM2Train(SAM2Base):
             t for t in range(start_frame_idx, num_frames) if t not in init_cond_frames
         ]
         # Prepare mask or point inputs on initial conditioning frames
+        # For multitask (ME=decoder 0, NU=decoder 1):
+        # - decoder 0 outputs ME, so give it ME mask as input
+        # - decoder 1 outputs NU and already has NU target in loss
         backbone_out["mask_inputs_per_frame"] = {}  # {frame_idx: <input_masks>}
         backbone_out["point_inputs_per_frame"] = {}  # {frame_idx: <input_points>}
         for t in init_cond_frames:
+            # Get ME mask (decoder 0) and NU mask (decoder 1)
+            me_mask = gt_masks_per_frame[t][:, :, 0, :, :]  # ME mask for decoder 0
             if not use_pt_input:
-                backbone_out["mask_inputs_per_frame"][t] = gt_masks_per_frame[t][
-                    :, :, self.multitask_num - 1, :, :
-                ]
+                # Use ME mask as input for decoder 0
+                backbone_out["mask_inputs_per_frame"][t] = me_mask
             else:
                 # During training # P(box) = prob_to_use_pt_input * prob_to_use_box_input
                 use_box_input = self.rng.random() < prob_to_use_box_input
                 if use_box_input:
-                    points, labels = sample_box_points(
-                        gt_masks_per_frame[t][:, :, self.multitask_num - 1, :, :],
-                    )
+                    points, labels = sample_box_points(me_mask)
                 else:
-                    # (here we only sample **one initial point** on initial conditioning frames from the
-                    # ground-truth mask; we may sample more correction points on the fly)
                     points, labels = get_next_point(
-                        gt_masks=gt_masks_per_frame[t][
-                            :, :, self.multitask_num - 1, :, :
-                        ],
+                        gt_masks=me_mask,
                         pred_masks=None,
                         method=(
                             "uniform" if self.training else self.pt_sampling_for_eval

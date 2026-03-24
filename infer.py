@@ -55,6 +55,29 @@ config = {
         "order": [0, 1],
         "multitask_num": 2,
     },
+    "trop2_me_nu": {
+        "ckpt_path": "checkpoints/sam2_trop2_me_nu_finetuned.pth",
+        "config_file": "configs/sam2.1/sam2.1_hiera_b+.yaml",
+        "label": ["肿瘤细胞膜", "肿瘤细胞核"],
+        "order": [0, 1],
+        "multitask_num": 2,
+    },
+    # 单任务模型 - ME (细胞膜)
+    "trop2_me_only": {
+        "ckpt_path": "checkpoints/trop2_me_only_train/checkpoints/checkpoint.pt",
+        "config_file": "configs/sam2.1/sam2.1_hiera_b+.yaml",
+        "label": ["肿瘤细胞膜"],
+        "order": [0],
+        "multitask_num": 1,
+    },
+    # 单任务模型 - NU (细胞核)
+    "trop2_nu_only": {
+        "ckpt_path": "checkpoints/trop2_nu_only_train/checkpoints/checkpoint.pt",
+        "config_file": "configs/sam2.1/sam2.1_hiera_b+.yaml",
+        "label": ["肿瘤细胞核"],
+        "order": [0],
+        "multitask_num": 1,
+    },
 }
 cfg = OmegaConf.create(config)
 
@@ -194,7 +217,8 @@ def evaluate(img_path, json_path, keys=["肿瘤细胞膜"], save_res=False):
 
 def infer(img_path, save_res=True):
     # 准备图像
-    prompts_json_path = img_path.replace(".png", ".json")
+    # JSON 文件在 jsons/ 目录下，与 JPEGImages/ 平级
+    prompts_json_path = img_path.replace("JPEGImages", "jsons").replace(".png", ".json")
     img = Image.open(img_path)
     image = np.array(img.copy().convert("RGB"))
 
@@ -255,9 +279,9 @@ def infer(img_path, save_res=True):
                 img_path.replace(".png", f"_{args.model.split('_')[-1]}_{label}.png"),
                 image[:, :, ::-1],
             )
-            print(
-                f"save res to {img_path.replace('.png', f'_{args.model.split('_')[-1]}_{label}.png')}"
-            )
+            model_suffix = args.model.split('_')[-1]
+            save_path = img_path.replace('.png', f'_{model_suffix}_{label}.png')
+            print(f"save res to {save_path}")
         with open(
                 img_path.replace(".png", f"_{args.model.split('_')[-1]}.json"),
                 "w",

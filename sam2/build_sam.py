@@ -87,7 +87,19 @@ def build_sam2(
             "++model.sam_mask_decoder_extra_args.dynamic_multimask_stability_thresh=0.98",
         ]
     # Read config and init model
-    cfg = compose(config_name=config_file, overrides=hydra_overrides_extra)
+    # Handle Hydra context - build_sam2 may be called outside Hydra's context
+    from hydra import initialize
+    from hydra.core.global_hydra import GlobalHydra
+    if not GlobalHydra.instance().is_initialized():
+        # Initialize Hydra with the config directory
+        # Convert to absolute path to avoid Hydra path resolution issues
+        config_file_abs = os.path.abspath(config_file)
+        config_dir = os.path.dirname(config_file_abs)
+        config_name = os.path.splitext(os.path.basename(config_file_abs))[0]
+        with initialize(version_base="1.3", config_path=config_dir):
+            cfg = compose(config_name=config_name, overrides=hydra_overrides_extra)
+    else:
+        cfg = compose(config_name=config_file, overrides=hydra_overrides_extra)
     if kwargs.get("multitask_num", None) is not None:
         cfg.model.multitask_num = kwargs["multitask_num"]
     OmegaConf.resolve(cfg)
@@ -181,6 +193,15 @@ def _load_checkpoint(model, ckpt_path):
         }
         # sd_filtered1 = {}
         sd_filtered.update(sd_filtered1)
+        # Copy decoder 0 weights to decoder 1 for multitask training
+        # This ensures both decoders start from pretrained weights instead of
+        # decoder 1 being randomly initialized
+        sd_filtered_decoder0_to_1 = {
+            k.replace("sam_mask_decoders.0.", "sam_mask_decoders.1."): v
+            for k, v in sd_filtered.items()
+            if "sam_mask_decoders.0." in k
+        }
+        sd_filtered.update(sd_filtered_decoder0_to_1)
         missing_keys, unexpected_keys = model.load_state_dict(sd_filtered, strict=False)
         if missing_keys:
             logging.error("Missing keys: " + ", ".join(missing_keys))
