@@ -62,13 +62,13 @@ config = {
         "order": [0, 1],
         "multitask_num": 2,
     },
-    # 单任务模型 - ME (细胞膜)
+    # 单任务模型 - ME (细胞膜) - 使用2解码器架构的权重
     "trop2_me_only": {
         "ckpt_path": "checkpoints/trop2_me_only_train/checkpoints/checkpoint.pt",
         "config_file": "configs/sam2.1/sam2.1_hiera_b+.yaml",
         "label": ["肿瘤细胞膜"],
         "order": [0],
-        "multitask_num": 1,
+        "multitask_num": 2,
     },
     # 单任务模型 - NU (细胞核)
     "trop2_nu_only": {
