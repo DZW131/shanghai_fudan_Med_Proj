@@ -338,9 +338,9 @@ def sample_one_point_from_error_center(gt_masks, pred_masks, padding=True):
     return points, labels
 
 
-def get_next_point(gt_masks, pred_masks, method):
+def get_next_point(gt_masks, pred_masks, method, num_pt=1):
     if method == "uniform":
-        return sample_random_points_from_errors(gt_masks, pred_masks)
+        return sample_random_points_from_errors(gt_masks, pred_masks, num_pt=num_pt)
     elif method == "center":
         return sample_one_point_from_error_center(gt_masks, pred_masks)
     else:

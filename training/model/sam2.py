@@ -63,6 +63,8 @@ class SAM2Train(SAM2Base):
         # instead of the prediction error regions with a small probability. This might allow the
         # model to overfit less to the error regions in training datasets
         prob_to_sample_from_gt_for_train=0.0,
+        # Number of points to sample per prompt during training
+        num_pt_to_sample=1,
         use_act_ckpt_iterative_pt_sampling=False,
         # whether to forward image features per frame (as it's being tracked) during evaluation, instead of forwarding image features
         # of all frames at once. This avoids backbone OOM errors on very long videos in evaluation, but could be slightly slower.
@@ -99,6 +101,7 @@ class SAM2Train(SAM2Base):
         self.num_correction_pt_per_frame = num_correction_pt_per_frame
         self.pt_sampling_for_eval = pt_sampling_for_eval
         self.prob_to_sample_from_gt_for_train = prob_to_sample_from_gt_for_train
+        self.num_pt_to_sample = num_pt_to_sample
         # A random number generator with a fixed initial seed across GPUs
         self.rng = np.random.default_rng(seed=42)
 
@@ -244,6 +247,7 @@ class SAM2Train(SAM2Base):
                         method=(
                             "uniform" if self.training else self.pt_sampling_for_eval
                         ),
+                        num_pt=self.num_pt_to_sample,
                     )
 
                 point_inputs = {"point_coords": points, "point_labels": labels}
