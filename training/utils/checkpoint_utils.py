@@ -360,7 +360,7 @@ def load_state_dict_into_model(
     # state_dict1 = {k.replace("sam_mask_decoders.0.", "sam_mask_decoders.1."): v  for k, v in state_dict.items() if "sam_mask_decoder" in k}
     state_dict1 = {}
     state_dict = {**state_dict0, **state_dict1}
-    # state_dict = {k:v for k, v in state_dict.items() if "maskmem_tpos_enc" not in k}
+    state_dict = {k:v for k, v in state_dict.items() if "maskmem_tpos_enc" not in k}
     missing_keys, unexpected_keys = model.load_state_dict(state_dict, strict=False)
 
     check_load_state_dict_errors(

@@ -302,6 +302,7 @@ trainer:
       _partial_: True
       _target_: training.utils.checkpoint_utils.load_state_dict_into_model
       strict: True
+      ignore_missing_keys: ['maskmem_tpos_enc']
       ignore_unexpected_keys: null
       state_dict:
         _target_: training.utils.checkpoint_utils.load_checkpoint_and_apply_kernels
@@ -311,7 +312,7 @@ trainer:
 launcher:
   num_nodes: 1
   gpus_per_node: 1
-  experiment_log_dir: checkpoints/trop2_nu_only_train
+  experiment_log_dir: checkpoints/trop2_nu_only_train_dual_point
 
 submitit:
   partition: null

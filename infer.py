@@ -78,6 +78,14 @@ config = {
         "order": [0],
         "multitask_num": 1,
     },
+    # 单任务模型 - NU (细胞核) - 双点训练
+    "trop2_nu_only_dual_point": {
+        "ckpt_path": "checkpoints/trop2_nu_only_train_dual_point/checkpoints/checkpoint.pt",
+        "config_file": "configs/sam2.1/sam2.1_hiera_b+.yaml",
+        "label": ["肿瘤细胞核"],
+        "order": [0],
+        "multitask_num": 1,
+    },
 }
 cfg = OmegaConf.create(config)
 
