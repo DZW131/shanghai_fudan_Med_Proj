@@ -58,8 +58,8 @@ state_dict = {k:v for k, v in state_dict.items() if "maskmem_tpos_enc" not in k}
 ### Test Set Metrics
 | Metric | Value |
 |--------|-------|
-| Dice | 0.9317 |
-| BQ (Boundary Quality) | 0.7340 |
+| BDQ | 0.9317 |
+| BSQ (Boundary Quality) | 0.7340 |
 | BPQ (Boundary Precision Quality) | 0.6843 |
 | AJI (Aggregated Jaccard Index) | 0.7178 |
 
